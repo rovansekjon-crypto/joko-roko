@@ -3,156 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Compress - Ultra Performance</title>
+    <title>Elite Compress - Pro Version</title>
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     <style>
         :root {
             --primary: #3b82f6;
-            --primary-hover: #2563eb;
             --bg: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.8);
+            --card-bg: rgba(30, 41, 59, 0.9);
             --text: #f8fafc;
         }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
             color: var(--text);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
         }
-
         .container {
             background: var(--card-bg);
-            backdrop-filter: blur(16px);
             padding: 2.5rem;
-            border-radius: 28px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            border-radius: 24px;
             width: 100%;
-            max-width: 500px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 450px;
             text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
         }
-
-        h1 {
-            font-size: 2.2rem;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(90deg, #60a5fa, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
-        }
-
-        .tabs {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 2rem;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 6px;
-            border-radius: 14px;
-        }
-
-        .tab {
-            padding: 12px 5px;
-            border: none;
-            background: transparent;
-            color: #94a3b8;
-            cursor: pointer;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            transition: 0.2s;
-            text-transform: uppercase;
-        }
-
-        .tab.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-        }
-
-        .panel { display: none; animation: slideUp 0.4s ease; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 10px; border: none; background: #334155; color: white; cursor: pointer; border-radius: 8px; font-weight: bold; }
+        .tab.active { background: var(--primary); }
+        .panel { display: none; }
         .panel.active { display: block; }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .drop-zone {
-            border: 2px dashed rgba(255, 255, 255, 0.2);
-            padding: 3rem 1rem;
-            border-radius: 20px;
-            margin-bottom: 1.5rem;
+            border: 2px dashed #475569;
+            padding: 40px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
             cursor: pointer;
-            transition: 0.3s;
         }
-
-        .drop-zone:hover {
-            border-color: var(--primary);
-            background: rgba(59, 130, 246, 0.1);
-        }
-
-        .progress-container {
-            margin: 25px 0;
-            display: none;
-        }
-
-        .progress-bar {
-            height: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .progress-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-            transition: width 0.1s linear;
-        }
-
-        #statusText {
-            display: block;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #60a5fa;
-            font-weight: bold;
-        }
-
+        .progress-container { margin: 20px 0; display: none; }
+        .progress-bar { height: 10px; background: #334155; border-radius: 5px; overflow: hidden; }
+        .progress-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.2s; }
         .btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 1rem;
-            font-weight: 700;
+            padding: 15px;
+            border-radius: 10px;
             width: 100%;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn:hover { background: var(--primary-hover); transform: scale(1.02); }
-
-        .download-link {
-            background: #10b981;
-            color: white;
-            padding: 14px;
-            border-radius: 12px;
-            text-decoration: none;
-            display: inline-block;
-            width: 90%;
-            margin-top: 15px;
             font-weight: bold;
+            cursor: pointer;
+        }
+        .download-link {
+            display: block;
+            margin-top: 15px;
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px;
+            border: 1px solid #60a5fa;
+            border-radius: 8px;
         }
     </style>
 </head>
@@ -160,55 +74,43 @@
 
 <div class="container">
     <h1>Elite Compress</h1>
-    
     <div class="tabs">
-        <button class="tab active" onclick="openTab('img')">Images</button>
-        <button class="tab" onclick="openTab('vid')">Video</button>
+        <button class="tab active" onclick="openTab('img')">IMG</button>
+        <button class="tab" onclick="openTab('vid')">VIDEO</button>
         <button class="tab" onclick="openTab('pdf')">PDF</button>
         <button class="tab" onclick="openTab('zip')">ZIP</button>
     </div>
 
     <div id="img" class="panel active">
-        <div class="drop-zone" onclick="document.getElementById('inImg').click()">
-            <p>📸 Drop Images Here or Click</p>
-            <input type="file" id="inImg" multiple accept="image/*" style="display:none">
-        </div>
+        <div class="drop-zone" onclick="document.getElementById('inImg').click()">Click to upload Images</div>
+        <input type="file" id="inImg" multiple accept="image/*" style="display:none">
         <div id="outImg"></div>
     </div>
 
     <div id="vid" class="panel">
-        <div class="drop-zone" onclick="document.getElementById('inVid').click()">
-            <p>🎥 Select Video to Compress</p>
-            <input type="file" id="inVid" accept="video/*" style="display:none">
-        </div>
+        <div class="drop-zone" onclick="document.getElementById('inVid').click()">Click to upload Video</div>
+        <input type="file" id="inVid" accept="video/*" style="display:none">
         <div class="progress-container" id="progVid">
             <div class="progress-bar"><div class="progress-fill" id="fillVid"></div></div>
-            <span id="statusText">Ready: 0%</span>
+            <p id="statusText">Processing: 0%</p>
         </div>
         <div id="vidDownloadArea"></div>
     </div>
 
     <div id="pdf" class="panel">
-        <div class="drop-zone" onclick="document.getElementById('inPdf').click()">
-            <p>📄 Select PDF File</p>
-            <input type="file" id="inPdf" accept=".pdf" style="display:none">
-        </div>
-        <button class="btn" id="runPdf">Optimize PDF</button>
+        <input type="file" id="inPdf" accept=".pdf">
+        <button class="btn" id="runPdf" style="margin-top:10px">Compress PDF</button>
     </div>
 
     <div id="zip" class="panel">
-        <div class="drop-zone" onclick="document.getElementById('inZip').click()">
-            <p>📦 Select Files for ZIP</p>
-            <input type="file" id="inZip" multiple style="display:none">
-        </div>
-        <button class="btn" id="runZip">Create ZIP Archive</button>
+        <input type="file" id="inZip" multiple>
+        <button class="btn" id="runZip" style="margin-top:10px">Create ZIP</button>
     </div>
 </div>
 
 <script>
     const { createFFmpeg, fetchFile } = FFmpeg;
-    // We enable multi-threading core support
-    const ffmpeg = createFFmpeg({ log: false, mainName: 'main', corePath: 'https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js' });
+    const ffmpeg = createFFmpeg({ log: false });
 
     function openTab(id) {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -217,7 +119,7 @@
         event.currentTarget.classList.add('active');
     }
 
-    // --- ULTRA FAST VIDEO COMPRESSION ---
+    // --- VIDEO COMPRESSION ---
     document.getElementById('inVid').onchange = async (e) => {
         const file = e.target.files[0];
         if(!file) return;
@@ -234,23 +136,20 @@
         }
 
         ffmpeg.setProgress(({ ratio }) => {
-            const pct = Math.min(Math.round(ratio * 100), 99);
+            const pct = Math.round(ratio * 100);
             fill.style.width = pct + '%';
             text.innerText = `Compressing: ${pct}%`;
         });
 
         ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
         
-        // PERFORMANCE SETTINGS: 
-        // -preset ultrafast (max speed)
-        // -threads 0 (use all available CPU cores)
-        // -crf 30 (high compression, good quality)
+        // Zamenjali smo 'ultrafast' z 'medium' za boljšo kompresijo
+        // CRF 30 bo močno zmanjšal datoteko
         await ffmpeg.run(
             '-i', 'input.mp4',
             '-vcodec', 'libx264',
             '-crf', '30',
-            '-preset', 'ultrafast',
-            '-threads', '0', 
+            '-preset', 'medium',
             '-movflags', '+faststart',
             'output.mp4'
         );
@@ -258,10 +157,8 @@
         const data = ffmpeg.FS('readFile', 'output.mp4');
         const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
         
-        fill.style.width = '100%';
-        text.innerText = "Done! 100%";
-        
-        downloadArea.innerHTML = `<a href="${url}" download="compressed_video.mp4" class="download-link">⬇️ Download Optimized Video</a>`;
+        text.innerText = "Done!";
+        downloadArea.innerHTML = `<a href="${url}" download="compressed.mp4" class="download-link">⬇️ Download Compressed Video</a>`;
     };
 
     // --- IMAGE COMPRESSION ---
@@ -279,11 +176,11 @@
                     canvas.toBlob((blob) => {
                         const a = document.createElement('a');
                         a.href = URL.createObjectURL(blob);
-                        a.download = `optimized_${file.name}`;
-                        a.innerText = `⬇️ Download ${file.name}`;
+                        a.download = `opti_${file.name}`;
+                        a.innerText = `Download ${file.name}`;
                         a.className = "download-link";
                         out.appendChild(a);
-                    }, 'image/jpeg', 0.65);
+                    }, 'image/jpeg', 0.6);
                 };
                 img.src = ev.target.result;
             };
@@ -291,10 +188,10 @@
         });
     };
 
-    // --- PDF OPTIMIZATION ---
+    // --- PDF ---
     document.getElementById('runPdf').onclick = async () => {
         const file = document.getElementById('inPdf').files[0];
-        if(!file) return alert("Select a PDF first!");
+        if(!file) return alert("Select PDF");
         const arrayBuffer = await file.arrayBuffer();
         const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
         const newPdf = await PDFLib.PDFDocument.create();
@@ -303,14 +200,13 @@
         const pdfBytes = await newPdf.save();
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
-        a.download = "optimized.pdf";
+        a.download = "compressed.pdf";
         a.click();
     };
 
-    // --- ZIP ARCHIVE ---
+    // --- ZIP ---
     document.getElementById('runZip').onclick = async () => {
         const files = document.getElementById('inZip').files;
-        if(files.length === 0) return alert("Select files first!");
         const zip = new JSZip();
         Array.from(files).forEach(f => zip.file(f.name, f));
         const content = await zip.generateAsync({type:"blob"});
