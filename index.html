@@ -1,18 +1,19 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="sl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Kompresor</title>
+    <title>Elite Kompresor Vse-v-Enem</title>
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     <style>
         :root { --p: #2563eb; --bg: #f8fafc; }
         body { font-family: system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 2rem; border-radius: 1rem; shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 500px; border: 1px solid #e2e8f0; }
-        h1 { color: var(--p); text-align: center; margin-bottom: 1.5rem; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab { flex: 1; padding: 10px; border: none; background: #e2e8f0; cursor: pointer; border-radius: 8px; font-weight: bold; }
+        .card { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 500px; border: 1px solid #e2e8f0; }
+        h1 { color: var(--p); text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab { flex: 1; padding: 10px; border: none; background: #e2e8f0; cursor: pointer; border-radius: 8px; font-weight: bold; font-size: 0.8rem; min-width: 80px; }
         .tab.active { background: var(--p); color: white; }
         .panel { display: none; }
         .panel.active { display: block; }
@@ -20,6 +21,8 @@
         .btn { width: 100%; padding: 12px; background: var(--p); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; display: none; }
         .loader { display: none; text-align: center; margin: 15px 0; color: #64748b; font-size: 0.9rem; }
         #logVid { font-weight: bold; color: var(--p); }
+        .out-list { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
+        a { color: var(--p); text-decoration: none; display: block; margin: 5px 0; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -30,24 +33,31 @@
     <div class="tabs">
         <button class="tab active" onclick="openTab('img')">Slike</button>
         <button class="tab" onclick="openTab('vid')">Video</button>
+        <button class="tab" onclick="openTab('pdf')">PDF</button>
         <button class="tab" onclick="openTab('zip')">ZIP</button>
     </div>
 
     <div id="img" class="panel active">
-        <p>Izberi slike za optimizacijo (JPG/PNG):</p>
+        <p>Optimizacija slik (JPG/PNG):</p>
         <input type="file" id="inImg" accept="image/*" multiple>
-        <div id="outImg"></div>
+        <div id="outImg" class="out-list"></div>
     </div>
 
     <div id="vid" class="panel">
-        <p>Video kompresija (Ultra Speed + 50% manjša datoteka):</p>
-        <input type="file" id="inVid" accept="video/mp4,video/x-m4v,video/*">
-        <div class="loader" id="lVid">⚙️ <span id="logVid">Priprava...</span></div>
-        <button class="btn" id="dlVid">⬇️ Prenesi stisnjen video</button>
+        <p>Video (Turbo Mode - 50% manjši):</p>
+        <input type="file" id="inVid" accept="video/*">
+        <div class="loader" id="lVid">⚙️ <span id="logVid">Čakam na datoteko...</span></div>
+        <button class="btn" id="dlVid">⬇️ Prenesi video</button>
+    </div>
+
+    <div id="pdf" class="panel">
+        <p>Zmanjšaj PDF (odstrani nepotrebno):</p>
+        <input type="file" id="inPdf" accept=".pdf">
+        <button class="btn" id="dlPdf" style="display:block;">📄 Stisni PDF</button>
     </div>
 
     <div id="zip" class="panel">
-        <p>Zapakiraj več datotek v eno ZIP datoteko:</p>
+        <p>Ustvari arhiv (ZIP):</p>
         <input type="file" id="inZip" multiple>
         <button class="btn" id="dlZip" style="display:block;">📦 Ustvari ZIP</button>
     </div>
@@ -66,28 +76,26 @@
 
     // --- SLIKE ---
     document.getElementById('inImg').onchange = (e) => {
-        const files = e.target.files;
         const out = document.getElementById('outImg');
-        out.innerHTML = '';
-        Array.from(files).forEach(file => {
+        out.innerHTML = 'Stiskanje...';
+        Array.from(e.target.files).forEach(file => {
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = (ev) => {
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
                     canvas.width = img.width; canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
+                    canvas.getContext('2d').drawImage(img, 0, 0);
                     canvas.toBlob((blob) => {
-                        const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
-                        a.href = url; a.download = `stisnjeno_${file.name}`;
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `opti_${file.name}`;
                         a.innerText = `⬇️ Prenesi: ${file.name}`;
-                        a.style.display = 'block'; a.style.margin = '10px 0';
+                        out.innerHTML = out.innerHTML === 'Stiskanje...' ? '' : out.innerHTML;
                         out.appendChild(a);
                     }, 'image/jpeg', 0.7);
                 };
-                img.src = event.target.result;
+                img.src = ev.target.result;
             };
             reader.readAsDataURL(file);
         });
@@ -103,30 +111,17 @@
         document.getElementById('dlVid').style.display="none";
         
         if (!ffmpeg.isLoaded()) {
-            log.innerText = "Nalagam motor (FFmpeg)...";
+            log.innerText = "Nalagam motor...";
             await ffmpeg.load();
         }
         
-        log.innerText = "Berem datoteko...";
         ffmpeg.FS('writeFile', 'in.mp4', await fetchFile(f));
+        log.innerText = "Stiskam (Turbo)...";
         
-        log.innerText = "Stiskam... (50% manjša datoteka, High Quality)";
-        
-        // ELITNI UKAZ: 
-        // -crf 28 (velikost), -preset veryfast (hitrost), -faststart (takojšnje predvajanje)
-        await ffmpeg.run(
-            '-i', 'in.mp4', 
-            '-vcodec', 'libx264', 
-            '-crf', '28', 
-            '-preset', 'veryfast', 
-            '-movflags', '+faststart',
-            '-pix_fmt', 'yuv420p',
-            'out.mp4'
-        );
+        await ffmpeg.run('-i', 'in.mp4', '-vcodec', 'libx264', '-crf', '28', '-preset', 'veryfast', '-movflags', '+faststart', '-pix_fmt', 'yuv420p', 'out.mp4');
 
         const data = ffmpeg.FS('readFile', 'out.mp4');
         outVidBlob = new Blob([data.buffer], { type: 'video/mp4' });
-        
         log.innerText = "Končano!";
         document.getElementById('dlVid').style.display="block";
         document.getElementById('lVid').style.display="none";
@@ -136,6 +131,24 @@
         const a = document.createElement('a');
         a.href = URL.createObjectURL(outVidBlob);
         a.download = "stisnjen_video.mp4";
+        a.click();
+    };
+
+    // --- PDF ---
+    document.getElementById('dlPdf').onclick = async () => {
+        const file = document.getElementById('inPdf').files[0];
+        if(!file) return alert("Izberi PDF!");
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+        // Osnovna optimizacija (ponovni izris strani)
+        const newPdf = await PDFLib.PDFDocument.create();
+        const pages = await newPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+        pages.forEach(p => newPdf.addPage(p));
+        const pdfBytes = await newPdf.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = "stisnjen.pdf";
         a.click();
     };
 
