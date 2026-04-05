@@ -1,65 +1,206 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="sl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Kompresor Vse-v-Enem</title>
+    <title>Elite Compress - Ultra Fast</title>
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     <style>
-        :root { --p: #2563eb; --bg: #f8fafc; }
-        body { font-family: system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 500px; border: 1px solid #e2e8f0; }
-        h1 { color: var(--p); text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem; }
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; flex-wrap: wrap; }
-        .tab { flex: 1; padding: 10px; border: none; background: #e2e8f0; cursor: pointer; border-radius: 8px; font-weight: bold; font-size: 0.8rem; min-width: 80px; }
-        .tab.active { background: var(--p); color: white; }
-        .panel { display: none; }
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 480px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 5px;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 10px 5px;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .panel { display: none; animation: fadeIn 0.3s ease-out; }
         .panel.active { display: block; }
-        input { width: 100%; margin: 10px 0; }
-        .btn { width: 100%; padding: 12px; background: var(--p); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; display: none; }
-        .loader { display: none; text-align: center; margin: 15px 0; color: #64748b; font-size: 0.9rem; }
-        #logVid { font-weight: bold; color: var(--p); }
-        .out-list { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
-        a { color: var(--p); text-decoration: none; display: block; margin: 5px 0; font-size: 0.9rem; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            border-radius: 16px;
+            transition: all 0.3s;
+            margin-bottom: 1rem;
+        }
+
+        .upload-area:hover { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
+
+        input[type="file"] { display: none; }
+        .file-label { cursor: pointer; color: #cbd5e1; display: block; }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, background 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .btn:active { transform: translateY(0); }
+
+        /* Progress Bar Styles */
+        .progress-wrapper {
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #a855f7);
+            transition: width 0.3s;
+        }
+
+        #statusText {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .out-list a {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 10px;
+            color: #60a5fa;
+            text-decoration: none;
+            display: block;
+            margin-top: 8px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h1>🚀 Elite Kompresor</h1>
+<div class="container">
+    <h1>Elite Compress</h1>
     
     <div class="tabs">
-        <button class="tab active" onclick="openTab('img')">Slike</button>
-        <button class="tab" onclick="openTab('vid')">Video</button>
+        <button class="tab active" onclick="openTab('img')">SLIKE</button>
+        <button class="tab" onclick="openTab('vid')">VIDEO</button>
         <button class="tab" onclick="openTab('pdf')">PDF</button>
         <button class="tab" onclick="openTab('zip')">ZIP</button>
     </div>
 
     <div id="img" class="panel active">
-        <p>Optimizacija slik (JPG/PNG):</p>
-        <input type="file" id="inImg" accept="image/*" multiple>
+        <div class="upload-area">
+            <label class="file-label" for="inImg">🖼️ Klikni za slike (JPG/PNG)</label>
+            <input type="file" id="inImg" multiple accept="image/*">
+        </div>
         <div id="outImg" class="out-list"></div>
     </div>
 
     <div id="vid" class="panel">
-        <p>Video (Turbo Mode - 50% manjši):</p>
-        <input type="file" id="inVid" accept="video/*">
-        <div class="loader" id="lVid">⚙️ <span id="logVid">Čakam na datoteko...</span></div>
-        <button class="btn" id="dlVid">⬇️ Prenesi video</button>
+        <div class="upload-area">
+            <label class="file-label" for="inVid">🎥 Izberi video (MP4/MOV)</label>
+            <input type="file" id="inVid" accept="video/*">
+        </div>
+        <div class="progress-wrapper" id="progVid">
+            <div class="progress-bar"><div class="progress-fill" id="fillVid"></div></div>
+            <span id="statusText">Procentov: 0%</span>
+        </div>
+        <button class="btn" id="dlVid" style="display:none">⬇️ Prenesi video</button>
     </div>
 
     <div id="pdf" class="panel">
-        <p>Zmanjšaj PDF (odstrani nepotrebno):</p>
-        <input type="file" id="inPdf" accept=".pdf">
-        <button class="btn" id="dlPdf" style="display:block;">📄 Stisni PDF</button>
+        <div class="upload-area">
+            <label class="file-label" for="inPdf">📄 Izberi PDF datoteko</label>
+            <input type="file" id="inPdf" accept=".pdf">
+        </div>
+        <button class="btn" id="runPdf" style="display:block">Stisni PDF</button>
     </div>
 
     <div id="zip" class="panel">
-        <p>Ustvari arhiv (ZIP):</p>
-        <input type="file" id="inZip" multiple>
-        <button class="btn" id="dlZip" style="display:block;">📦 Ustvari ZIP</button>
+        <div class="upload-area">
+            <label class="file-label" for="inZip">📦 Izberi datoteke za arhiv</label>
+            <input type="file" id="inZip" multiple>
+        </div>
+        <button class="btn" id="runZip" style="display:block">Ustvari ZIP</button>
     </div>
 </div>
 
@@ -74,10 +215,55 @@
         event.currentTarget.classList.add('active');
     }
 
+    // --- VIDEO S PROCENTI ---
+    let outVidBlob = null;
+    document.getElementById('inVid').onchange = async (e) => {
+        const f = e.target.files[0];
+        if(!f) return;
+
+        const wrapper = document.getElementById('progVid');
+        const fill = document.getElementById('fillVid');
+        const text = document.getElementById('statusText');
+        const dlBtn = document.getElementById('dlVid');
+
+        wrapper.style.display = 'block';
+        dlBtn.style.display = 'none';
+
+        if (!ffmpeg.isLoaded()) {
+            text.innerText = "Nalagam motor (FFmpeg)...";
+            await ffmpeg.load();
+        }
+
+        // FUNKCIJA ZA PROCENTE
+        ffmpeg.setProgress(({ ratio }) => {
+            const pct = Math.round(ratio * 100);
+            fill.style.width = pct + '%';
+            text.innerText = `Obdelava: ${pct}%`;
+        });
+
+        ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(f));
+        
+        text.innerText = "Stiskanje v teku...";
+        await ffmpeg.run('-i', 'input.mp4', '-vcodec', 'libx264', '-crf', '28', '-preset', 'veryfast', 'output.mp4');
+
+        const data = ffmpeg.FS('readFile', 'output.mp4');
+        outVidBlob = new Blob([data.buffer], { type: 'video/mp4' });
+
+        text.innerText = "Končano! 100%";
+        dlBtn.style.display = 'block';
+    };
+
+    document.getElementById('dlVid').onclick = () => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(outVidBlob);
+        a.download = "stisnjeno.mp4";
+        a.click();
+    };
+
     // --- SLIKE ---
     document.getElementById('inImg').onchange = (e) => {
         const out = document.getElementById('outImg');
-        out.innerHTML = 'Stiskanje...';
+        out.innerHTML = '';
         Array.from(e.target.files).forEach(file => {
             const reader = new FileReader();
             reader.onload = (ev) => {
@@ -90,8 +276,7 @@
                         const a = document.createElement('a');
                         a.href = URL.createObjectURL(blob);
                         a.download = `opti_${file.name}`;
-                        a.innerText = `⬇️ Prenesi: ${file.name}`;
-                        out.innerHTML = out.innerHTML === 'Stiskanje...' ? '' : out.innerHTML;
+                        a.innerText = `⬇️ Prenesi ${file.name}`;
                         out.appendChild(a);
                     }, 'image/jpeg', 0.7);
                 };
@@ -101,46 +286,12 @@
         });
     };
 
-    // --- VIDEO (Elite Setup) ---
-    let outVidBlob = null;
-    document.getElementById('inVid').onchange = async (e) => {
-        const f = e.target.files[0];
-        if(!f) return;
-        const log = document.getElementById('logVid');
-        document.getElementById('lVid').style.display="block";
-        document.getElementById('dlVid').style.display="none";
-        
-        if (!ffmpeg.isLoaded()) {
-            log.innerText = "Nalagam motor...";
-            await ffmpeg.load();
-        }
-        
-        ffmpeg.FS('writeFile', 'in.mp4', await fetchFile(f));
-        log.innerText = "Stiskam (Turbo)...";
-        
-        await ffmpeg.run('-i', 'in.mp4', '-vcodec', 'libx264', '-crf', '28', '-preset', 'veryfast', '-movflags', '+faststart', '-pix_fmt', 'yuv420p', 'out.mp4');
-
-        const data = ffmpeg.FS('readFile', 'out.mp4');
-        outVidBlob = new Blob([data.buffer], { type: 'video/mp4' });
-        log.innerText = "Končano!";
-        document.getElementById('dlVid').style.display="block";
-        document.getElementById('lVid').style.display="none";
-    };
-
-    document.getElementById('dlVid').onclick = () => {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(outVidBlob);
-        a.download = "stisnjen_video.mp4";
-        a.click();
-    };
-
     // --- PDF ---
-    document.getElementById('dlPdf').onclick = async () => {
+    document.getElementById('runPdf').onclick = async () => {
         const file = document.getElementById('inPdf').files[0];
-        if(!file) return alert("Izberi PDF!");
+        if(!file) return alert("Izberi datoteko!");
         const arrayBuffer = await file.arrayBuffer();
         const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
-        // Osnovna optimizacija (ponovni izris strani)
         const newPdf = await PDFLib.PDFDocument.create();
         const pages = await newPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
         pages.forEach(p => newPdf.addPage(p));
@@ -153,7 +304,7 @@
     };
 
     // --- ZIP ---
-    document.getElementById('dlZip').onclick = async () => {
+    document.getElementById('runZip').onclick = async () => {
         const files = document.getElementById('inZip').files;
         if(files.length === 0) return alert("Izberi datoteke!");
         const zip = new JSZip();
@@ -168,4 +319,3 @@
 
 </body>
 </html>
-
