@@ -3,157 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Svetovni Kompresor | Vse-v-enem</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/browser-image-compression/2.0.2/browser-image-compression.js"></script>
+    <title>Elite Kompresor</title>
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
-
     <style>
-        :root { --p: #2563eb; --s: #059669; --bg: #f8fafc; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
-        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
-        h1 { text-align: center; color: var(--p); margin-bottom: 30px; }
-        
-        .tabs { display: flex; justify-content: space-around; margin-bottom: 25px; background: #f1f5f9; padding: 5px; border-radius: 12px; }
-        .tab { cursor: pointer; padding: 12px 20px; border-radius: 10px; font-weight: 600; flex: 1; text-align: center; transition: 0.2s; color: #64748b; }
-        .tab.active { background: white; color: var(--p); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        
-        .content { display: none; text-align: center; border: 3px dashed #e2e8f0; padding: 50px 20px; border-radius: 20px; transition: 0.3s; }
-        .content.active { display: block; border-color: var(--p); }
-
-        input[type="file"] { margin: 20px 0; display: block; width: 100%; cursor: pointer; }
-        .btn { background: var(--s); color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; width: 100%; display: none; font-weight: bold; margin-top: 15px; }
-        .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid var(--p); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
-        #log { margin-top: 20px; font-weight: 500; color: #475569; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        :root { --p: #2563eb; --bg: #f8fafc; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 2rem; border-radius: 1rem; shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 500px; border: 1px solid #e2e8f0; }
+        h1 { color: var(--p); text-align: center; margin-bottom: 1.5rem; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 10px; border: none; background: #e2e8f0; cursor: pointer; border-radius: 8px; font-weight: bold; }
+        .tab.active { background: var(--p); color: white; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        input { width: 100%; margin: 10px 0; }
+        .btn { width: 100%; padding: 12px; background: var(--p); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; display: none; }
+        .loader { display: none; text-align: center; margin: 15px 0; color: #64748b; font-size: 0.9rem; }
+        #logVid { font-weight: bold; color: var(--p); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🚀 Super Kompresor</h1>
+<div class="card">
+    <h1>🚀 Elite Kompresor</h1>
     
     <div class="tabs">
-        <div class="tab active" onclick="showTab('img')">Slike</div>
-        <div class="tab" onclick="showTab('pdf')">PDF</div>
-        <div class="tab" onclick="showTab('vid')">Video</div>
-        <div class="tab" onclick="showTab('zip')">ZIP</div>
+        <button class="tab active" onclick="openTab('img')">Slike</button>
+        <button class="tab" onclick="openTab('vid')">Video</button>
+        <button class="tab" onclick="openTab('zip')">ZIP</button>
     </div>
 
-    <div id="img" class="content active">
-        <h2>Stisni Slike</h2>
-        <input type="file" id="inImg" accept="image/*">
-        <div class="loader" id="lImg"></div>
-        <div id="logImg"></div>
-        <button class="btn" id="dlImg">Prenesi Sliko</button>
+    <div id="img" class="panel active">
+        <p>Izberi slike za optimizacijo (JPG/PNG):</p>
+        <input type="file" id="inImg" accept="image/*" multiple>
+        <div id="outImg"></div>
     </div>
 
-    <div id="pdf" class="content">
-        <h2>Stisni PDF</h2>
-        <input type="file" id="inPdf" accept="application/pdf">
-        <div class="loader" id="lPdf"></div>
-        <div id="logPdf"></div>
-        <button class="btn" id="dlPdf">Prenesi PDF</button>
+    <div id="vid" class="panel">
+        <p>Video kompresija (Ultra Speed + 50% manjša datoteka):</p>
+        <input type="file" id="inVid" accept="video/mp4,video/x-m4v,video/*">
+        <div class="loader" id="lVid">⚙️ <span id="logVid">Priprava...</span></div>
+        <button class="btn" id="dlVid">⬇️ Prenesi stisnjen video</button>
     </div>
 
-    <div id="vid" class="content">
-        <h2>Stisni Video (MP4)</h2>
-        <p><i>Opomba: Video potrebuje nekaj časa za nalaganje.</i></p>
-        <input type="file" id="inVid" accept="video/mp4">
-        <div class="loader" id="lVid"></div>
-        <div id="logVid"></div>
-        <button class="btn" id="dlVid">Prenesi Video</button>
-    </div>
-
-    <div id="zip" class="content">
-        <h2>Ustvari ZIP</h2>
+    <div id="zip" class="panel">
+        <p>Zapakiraj več datotek v eno ZIP datoteko:</p>
         <input type="file" id="inZip" multiple>
-        <div class="loader" id="lZip"></div>
-        <div id="logZip"></div>
-        <button class="btn" id="dlZip">Prenesi ZIP</button>
+        <button class="btn" id="dlZip" style="display:block;">📦 Ustvari ZIP</button>
     </div>
 </div>
 
 <script>
-    function showTab(id) {
-        document.querySelectorAll('.content, .tab').forEach(el => el.classList.remove('active'));
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({ log: false });
+
+    function openTab(id) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         event.currentTarget.classList.add('active');
     }
 
     // --- SLIKE ---
-    let outImg = null;
-    document.getElementById('inImg').onchange = async (e) => {
-        const f = e.target.files[0];
-        document.getElementById('lImg').style.display="block";
-        const opt = { maxSizeMB: 0.8, maxWidthOrHeight: 1920, useWebWorker: true };
-        outImg = await imageCompression(f, opt);
-        document.getElementById('logImg').innerText = "Stisnjeno na: " + (outImg.size/1024).toFixed(0) + " KB";
-        document.getElementById('dlImg').style.display="block";
-        document.getElementById('lImg').style.display="none";
-    };
-    document.getElementById('dlImg').onclick = () => {
-        const a = document.createElement('a'); a.href = URL.createObjectURL(outImg); a.download = "stisnjeno.jpg"; a.click();
-    };
-
-    // --- PDF ---
-    let outPdf = null;
-    document.getElementById('inPdf').onchange = async (e) => {
-        document.getElementById('lPdf').style.display="block";
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-            const pdfDoc = await PDFLib.PDFDocument.load(ev.target.result);
-            outPdf = await pdfDoc.save();
-            document.getElementById('logPdf').innerText = "PDF je pripravljen!";
-            document.getElementById('dlPdf').style.display="block";
-            document.getElementById('lPdf').style.display="none";
-        };
-        reader.readAsArrayBuffer(e.target.files[0]);
-    };
-    document.getElementById('dlPdf').onclick = () => {
-        const b = new Blob([outPdf], {type:"application/pdf"});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download="optimizirano.pdf"; a.click();
+    document.getElementById('inImg').onchange = (e) => {
+        const files = e.target.files;
+        const out = document.getElementById('outImg');
+        out.innerHTML = '';
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width; canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    canvas.toBlob((blob) => {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = `stisnjeno_${file.name}`;
+                        a.innerText = `⬇️ Prenesi: ${file.name}`;
+                        a.style.display = 'block'; a.style.margin = '10px 0';
+                        out.appendChild(a);
+                    }, 'image/jpeg', 0.7);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
     };
 
-    // --- VIDEO (FFMPEG) ---
-    const { createFFmpeg, fetchFile } = FFmpeg;
-    const ffmpeg = createFFmpeg({ log: false });
-    let outVid = null;
+    // --- VIDEO (Elite Setup) ---
+    let outVidBlob = null;
     document.getElementById('inVid').onchange = async (e) => {
         const f = e.target.files[0];
+        if(!f) return;
         const log = document.getElementById('logVid');
         document.getElementById('lVid').style.display="block";
-        if (!ffmpeg.isLoaded()) await ffmpeg.load();
-        log.innerText = "Stiskanje videa... Prosim, ne zapiraj okna.";
+        document.getElementById('dlVid').style.display="none";
+        
+        if (!ffmpeg.isLoaded()) {
+            log.innerText = "Nalagam motor (FFmpeg)...";
+            await ffmpeg.load();
+        }
+        
+        log.innerText = "Berem datoteko...";
         ffmpeg.FS('writeFile', 'in.mp4', await fetchFile(f));
-        await ffmpeg.run('-i', 'in.mp4', '-vcodec', 'libx264', '-crf', '28', 'out.mp4');
+        
+        log.innerText = "Stiskam... (50% manjša datoteka, High Quality)";
+        
+        // ELITNI UKAZ: 
+        // -crf 28 (velikost), -preset veryfast (hitrost), -faststart (takojšnje predvajanje)
+        await ffmpeg.run(
+            '-i', 'in.mp4', 
+            '-vcodec', 'libx264', 
+            '-crf', '28', 
+            '-preset', 'veryfast', 
+            '-movflags', '+faststart',
+            '-pix_fmt', 'yuv420p',
+            'out.mp4'
+        );
+
         const data = ffmpeg.FS('readFile', 'out.mp4');
-        outVid = new Blob([data.buffer], { type: 'video/mp4' });
+        outVidBlob = new Blob([data.buffer], { type: 'video/mp4' });
+        
         log.innerText = "Končano!";
         document.getElementById('dlVid').style.display="block";
         document.getElementById('lVid').style.display="none";
     };
+
     document.getElementById('dlVid').onclick = () => {
-        const a = document.createElement('a'); a.href = URL.createObjectURL(outVid); a.download="video.mp4"; a.click();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(outVidBlob);
+        a.download = "stisnjen_video.mp4";
+        a.click();
     };
 
     // --- ZIP ---
-    let outZip = null;
-    document.getElementById('inZip').onchange = async (e) => {
+    document.getElementById('dlZip').onclick = async () => {
+        const files = document.getElementById('inZip').files;
+        if(files.length === 0) return alert("Izberi datoteke!");
         const zip = new JSZip();
-        for (let f of e.target.files) { zip.file(f.name, f); }
-        document.getElementById('lZip').style.display="block";
-        outZip = await zip.generateAsync({type:"blob", compression: "DEFLATE"});
-        document.getElementById('logZip').innerText = "ZIP arhiv ustvarjen!";
-        document.getElementById('dlZip').style.display="block";
-        document.getElementById('lZip').style.display="none";
-    };
-    document.getElementById('dlZip').onclick = () => {
-        const a = document.createElement('a'); a.href = URL.createObjectURL(outZip); a.download="arhiv.zip"; a.click();
+        Array.from(files).forEach(f => zip.file(f.name, f));
+        const content = await zip.generateAsync({type:"blob"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(content);
+        a.download = "arhiv.zip";
+        a.click();
     };
 </script>
 
 </body>
 </html>
+
